@@ -25,7 +25,7 @@ left:0;
 width:100%;
 height:100%;
 background:#111;
-color:#22c55e;
+color:#3b82f6;
 padding:30px;
 font-size:14px;
 }
@@ -54,7 +54,7 @@ font-size:32px;
 }
 
 .cursor{
-color:#22c55e;
+color:#3b82f6;
 animation:blink 1s infinite;
 }
 
@@ -62,7 +62,7 @@ animation:blink 1s infinite;
 50%{opacity:0}
 }
 
-.clock{color:#22c55e;}
+.clock{color:#3b82f6;}
 .uptime{font-size:13px;color:#9ca3af}
 
 /* CARDS */
@@ -95,7 +95,7 @@ overflow:hidden;
 .bar span{
 display:block;
 height:100%;
-background:#22c55e;
+background:#3b82f6;
 width:0%;
 }
 
@@ -114,7 +114,7 @@ grid-template-columns:80px 1fr 120px 100px;
 }
 
 .htop-header{
-color:#22c55e;
+color:#3b82f6;
 margin-bottom:8px;
 }
 
@@ -129,7 +129,7 @@ overflow:hidden;
 .cpu-bar span{
 display:block;
 height:100%;
-background:#22c55e;
+background:#3b82f6;
 }
 
 /* LOGS */
@@ -141,7 +141,7 @@ border-radius:10px;
 margin-top:20px;
 height:160px;
 overflow:hidden;
-color:#22c55e;
+color:#3b82f6;
 font-size:13px;
 }
 
@@ -152,7 +152,7 @@ margin-top:30px;
 }
 
 .contact a{
-color:#22c55e;
+color:#3b82f6;
 text-decoration:none;
 }
 
@@ -178,20 +178,20 @@ text-decoration:none;
 
 <p>
 Linux System Administrator experienced in managing production
-Linux environments and ensuring high availability of critical
-services. Skilled in system monitoring, troubleshooting,
-performance tuning and maintaining secure infrastructure.
+Linux environments, ensuring system availability, monitoring servers
+and troubleshooting infrastructure issues.
 </p>
 
 <p>
-Experienced with Linux services including SSH, Nginx,
-systemd, cron jobs, log analysis and server monitoring tools.
+Experienced with SSH, Nginx, systemd, cron jobs,
+log monitoring and server performance optimization.
 </p>
 
 <p>
-Focused on maintaining reliable infrastructure and improving
-system performance in stable production environments.
+Focused on maintaining reliable infrastructure and stable
+production systems.
 </p>
+
 </div>
 
 <div class="grid">
@@ -216,7 +216,7 @@ Disk
 
 <div class="card">
 Servers
-<div class="stat">6 Online</div>
+<div class="stat" id="servers">0 Online</div>
 </div>
 
 </div>
@@ -291,24 +291,53 @@ dashboard.style.display="block"
 
 bootAnim()
 
+/* RANDOM UTIL */
+
 function r(n){return Math.floor(Math.random()*n)}
 
-const processes=["nginx","mysqld","docker","redis","node","postgres"]
+const cpuEl=document.getElementById("cpu")
+const memEl=document.getElementById("mem")
+const diskEl=document.getElementById("disk")
+const serversEl=document.getElementById("servers")
 
-function updateStats(){
+const cpuBar=document.getElementById("cpuBar")
+const memBar=document.getElementById("memBar")
+const diskBar=document.getElementById("diskBar")
 
-let cpu=r(90)+5
-let mem=r(80)+10
-let disk=r(70)+20
+/* CPU */
 
-cpuEl.innerText=cpu+"%"
-memEl.innerText=mem+"%"
-diskEl.innerText=disk+"%"
-
-cpuBar.style.width=cpu+"%"
-memBar.style.width=mem+"%"
-diskBar.style.width=disk+"%"
+function updateCPU(){
+let v=r(90)+5
+cpuEl.innerText=v+"%"
+cpuBar.style.width=v+"%"
 }
+
+/* MEMORY */
+
+function updateMem(){
+let v=r(80)+10
+memEl.innerText=v+"%"
+memBar.style.width=v+"%"
+}
+
+/* DISK */
+
+function updateDisk(){
+let v=r(70)+20
+diskEl.innerText=v+"%"
+diskBar.style.width=v+"%"
+}
+
+/* SERVERS */
+
+function updateServers(){
+let v=r(6)+3
+serversEl.innerText=v+" Online"
+}
+
+/* HTOP */
+
+const processes=["nginx","mysqld","docker","redis","node","postgres"]
 
 function updateHtop(){
 
@@ -323,8 +352,7 @@ html+=`
 <div class="htop-row">
 <span>${1000+r(4000)}</span>
 <span>${processes[r(processes.length)]}</span>
-<span>
-${cpu}%
+<span>${cpu}%
 <div class="cpu-bar"><span style="width:${cpu}%"></span></div>
 </span>
 <span>${mem}MB</span>
@@ -335,22 +363,25 @@ ${cpu}%
 htopTable.innerHTML=html
 }
 
+/* CLOCK */
+
 function updateClock(){
 clock.innerText=new Date().toLocaleTimeString()
 }
 
+/* UPTIME */
+
 const start=Date.now()
 
 function updateUptime(){
-
 let t=Math.floor((Date.now()-start)/1000)
-
 let h=Math.floor(t/3600)
 let m=Math.floor((t%3600)/60)
 let s=t%60
-
 uptime.innerText=`Uptime: ${h}h ${m}m ${s}s`
 }
+
+/* LOGS */
 
 const logsArr=[
 "ssh login detected",
@@ -371,21 +402,21 @@ if(logs.children.length>10)
 logs.removeChild(logs.lastChild)
 }
 
-const cpuEl=document.getElementById("cpu")
-const memEl=document.getElementById("mem")
-const diskEl=document.getElementById("disk")
+/* REALISTIC UPDATE INTERVALS */
 
-const cpuBar=document.getElementById("cpuBar")
-const memBar=document.getElementById("memBar")
-const diskBar=document.getElementById("diskBar")
-
-setInterval(updateStats,2000)
-setInterval(updateHtop,2000)
+setInterval(updateCPU,1200)
+setInterval(updateMem,2300)
+setInterval(updateDisk,5200)
+setInterval(updateServers,9000)
+setInterval(updateHtop,3000)
 setInterval(updateClock,1000)
 setInterval(updateUptime,1000)
-setInterval(updateLogs,2500)
+setInterval(updateLogs,4000)
 
-updateStats()
+updateCPU()
+updateMem()
+updateDisk()
+updateServers()
 updateHtop()
 updateClock()
 
