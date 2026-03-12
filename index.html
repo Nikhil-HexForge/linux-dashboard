@@ -2,58 +2,93 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
-<title>Nikhil Sonawane | Linux Dashboard</title>
-
+<title>Nikhil Sonawane | Linux Admin Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-
 body{
 margin:0;
-background:#0b1220;
+background:#000;
 color:#e2e8f0;
 font-family:'JetBrains Mono', monospace;
+overflow-x:hidden;
+}
+
+/* MATRIX BACKGROUND */
+
+#matrix{
+position:fixed;
+top:0;
+left:0;
+z-index:-1;
+}
+
+/* BOOT SCREEN */
+
+#boot{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#000;
+color:#22c55e;
+padding:30px;
+font-size:14px;
 }
 
 .container{
 max-width:1100px;
 margin:auto;
 padding:30px;
+display:none;
 }
+
+/* HEADER */
 
 header{
 display:flex;
 justify-content:space-between;
 align-items:center;
 margin-bottom:30px;
-flex-wrap:wrap;
 }
 
 header h1{
 margin:0;
-font-size:36px;
-font-weight:600;
+font-size:34px;
+}
+
+.cursor{
+animation:blink 1s infinite;
+color:#22c55e;
+}
+
+@keyframes blink{
+0%,50%,100%{opacity:1}
+25%,75%{opacity:0}
 }
 
 .clock{
 color:#22c55e;
-font-size:18px;
 }
 
-/* about */
+.uptime{
+font-size:13px;
+color:#94a3b8;
+}
+
+/* ABOUT */
 
 .about{
 background:#1e293b;
 padding:20px;
 border-radius:12px;
 margin-bottom:30px;
-line-height:1.6;
 }
 
-/* grid */
+/* GRID */
 
 .grid{
 display:grid;
@@ -61,27 +96,15 @@ grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
 gap:20px;
 }
 
-/* cards */
-
 .card{
 background:#1e293b;
 padding:20px;
 border-radius:12px;
-box-shadow:0 0 20px rgba(0,255,120,.05);
 }
-
-.card h3{
-margin:0 0 10px 0;
-}
-
-/* stat */
 
 .stat{
-font-size:34px;
-font-weight:600;
+font-size:30px;
 }
-
-/* progress */
 
 .bar{
 height:8px;
@@ -96,104 +119,177 @@ display:block;
 height:100%;
 background:#22c55e;
 width:0%;
-transition:width .5s ease;
+transition:.5s;
 }
-
-/* processes */
 
 .process{
 display:flex;
 justify-content:space-between;
-font-size:14px;
-padding:3px 0;
+font-size:13px;
 }
 
-/* network */
-
-.network{
+.terminal{
+background:#020617;
+padding:15px;
+border-radius:10px;
+height:180px;
+overflow:hidden;
 color:#22c55e;
+font-size:13px;
 }
-
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<canvas id="matrix"></canvas>
+<div id="boot"></div>
+
+<div class="container" id="dashboard">
 
 <header>
-<h1>Nikhil Sonawane</h1>
+<div>
+<h1>Nikhil Sonawane<span class="cursor">_</span></h1>
+<div class="uptime" id="uptime"></div>
+</div>
 <div class="clock" id="clock"></div>
 </header>
 
 <div class="about">
 <h3>Linux Administrator</h3>
-
-<p>
-Responsible for managing and maintaining Linux servers to ensure high
-availability, performance, and security across production environments.
-</p>
-
-<p>
-Daily responsibilities include system monitoring, user and permission
-management, log analysis, package updates, troubleshooting system
-issues, and maintaining stable server operations.
-</p>
-
-<p>
-Focused on security hardening, process monitoring, backup management,
-and maintaining reliable Linux infrastructure.
-</p>
-
+Maintaining secure Linux infrastructure, monitoring systems,
+managing services and ensuring production stability.
 </div>
 
 <div class="grid">
 
 <div class="card">
-<h3>CPU Usage</h3>
+CPU Usage
 <div class="stat" id="cpu">0%</div>
 <div class="bar"><span id="cpuBar"></span></div>
 </div>
 
 <div class="card">
-<h3>Memory Usage</h3>
+Memory
 <div class="stat" id="mem">0%</div>
 <div class="bar"><span id="memBar"></span></div>
 </div>
 
 <div class="card">
-<h3>Disk Usage</h3>
+Disk
 <div class="stat" id="disk">0%</div>
 <div class="bar"><span id="diskBar"></span></div>
 </div>
 
 <div class="card">
-<h3>Servers</h3>
+Servers
 <div class="stat">6 Online</div>
 </div>
 
 <div class="card">
-<h3>Running Processes</h3>
+Processes
 <div id="processList"></div>
 </div>
 
-<div class="card network">
-<h3>Network</h3>
+<div class="card">
+Network<br>
 In: <span id="in"></span> Kbps<br>
 Out: <span id="out"></span> Kbps
 </div>
 
+<div class="card">
+System Logs
+<div class="terminal" id="logs"></div>
 </div>
 
+</div>
 </div>
 
 <script>
 
-const processes=["nginx","mysqld","docker","redis","node","postgres"]
+/* MATRIX BACKGROUND */
 
-function r(n){
-return Math.floor(Math.random()*n)
+const canvas=document.getElementById("matrix")
+const ctx=canvas.getContext("2d")
+
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+
+const letters="01"
+const fontSize=14
+const columns=canvas.width/fontSize
+const drops=[]
+
+for(let x=0;x<columns;x++) drops[x]=1
+
+function drawMatrix(){
+ctx.fillStyle="rgba(0,0,0,0.05)"
+ctx.fillRect(0,0,canvas.width,canvas.height)
+
+ctx.fillStyle="#22c55e"
+ctx.font=fontSize+"px monospace"
+
+for(let i=0;i<drops.length;i++){
+const text=letters[Math.floor(Math.random()*letters.length)]
+ctx.fillText(text,i*fontSize,drops[i]*fontSize)
+
+if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
+drops[i]=0
+
+drops[i]++
 }
+}
+
+setInterval(drawMatrix,40)
+
+/* BOOT SCREEN */
+
+const bootScreen=document.getElementById("boot")
+
+const bootLines=[
+"Booting Linux Kernel...",
+"Loading modules...",
+"Starting Docker...",
+"Starting Nginx...",
+"Initializing network...",
+"Mounting filesystem...",
+"Starting monitoring services...",
+"System Ready."
+]
+
+let bootIndex=0
+
+function boot(){
+
+if(bootIndex<bootLines.length){
+
+let div=document.createElement("div")
+div.textContent=bootLines[bootIndex]
+
+bootScreen.appendChild(div)
+
+bootIndex++
+
+setTimeout(boot,400)
+
+}else{
+
+setTimeout(()=>{
+bootScreen.style.display="none"
+dashboard.style.display="block"
+},1000)
+
+}
+}
+
+boot()
+
+/* DASHBOARD */
+
+const processes=["nginx","mysqld","docker","redis","node","postgres"]
+const logsArr=["ssh login","docker restart","backup done","cron executed"]
+
+function r(n){return Math.floor(Math.random()*n)}
 
 function update(){
 
@@ -215,34 +311,41 @@ outEl.innerText=r(300)+60
 let html=""
 
 for(let i=0;i<5;i++){
-
-let name=processes[r(processes.length)]
-let cpu=r(5)+1
-let mem=r(500)+50
-
-html+=`
-<div class="process">
-<span>${name}</span>
-<span>${cpu}% | ${mem}MB</span>
-</div>
-`
-
+html+=`<div class="process">
+<span>${processes[r(processes.length)]}</span>
+<span>${r(5)}% | ${r(400)+100}MB</span>
+</div>`
 }
 
 processList.innerHTML=html
-
 }
 
 function updateClock(){
+clock.innerText=new Date().toLocaleTimeString()
+}
 
-const now=new Date()
+const startTime=Date.now()
 
-clock.innerText = now.toLocaleTimeString([],{
-hour:'2-digit',
-minute:'2-digit',
-second:'2-digit'
-})
+function updateUptime(){
 
+let diff=Math.floor((Date.now()-startTime)/1000)
+
+let h=Math.floor(diff/3600)
+let m=Math.floor((diff%3600)/60)
+let s=diff%60
+
+uptime.innerText=`System Uptime: ${h}h ${m}m ${s}s`
+}
+
+function updateLogs(){
+
+let el=document.createElement("div")
+el.textContent="$ "+logsArr[r(logsArr.length)]
+
+logs.prepend(el)
+
+if(logs.children.length>10)
+logs.removeChild(logs.lastChild)
 }
 
 const cpuEl=document.getElementById("cpu")
@@ -257,10 +360,14 @@ const inEl=document.getElementById("in")
 const outEl=document.getElementById("out")
 
 const processList=document.getElementById("processList")
+const logs=document.getElementById("logs")
 const clock=document.getElementById("clock")
+const uptime=document.getElementById("uptime")
 
 setInterval(update,2000)
 setInterval(updateClock,1000)
+setInterval(updateUptime,1000)
+setInterval(updateLogs,2500)
 
 update()
 updateClock()
