@@ -38,8 +38,9 @@ font-size:38px;
 }
 
 .clock{
-font-family:monospace;
+font-family:'Patrick Hand', cursive;
 color:#22c55e;
+font-size:22px;
 }
 
 /* about */
@@ -128,11 +129,23 @@ color:#22c55e;
 
 <div class="about">
 <h3>Linux Administrator</h3>
+
 <p>
-Maintaining secure and stable Linux environments,
-monitoring infrastructure, automating workflows,
-and keeping production systems reliable.
+Responsible for managing and maintaining Linux servers to ensure high
+availability, performance, and security across production environments.
 </p>
+
+<p>
+Daily responsibilities include system monitoring, user and permission
+management, log analysis, package updates, troubleshooting system
+issues, and maintaining stable server operations.
+</p>
+
+<p>
+Focused on security hardening, process monitoring, backup management,
+and maintaining reliable Linux infrastructure.
+</p>
+
 </div>
 
 <div class="grid">
@@ -225,7 +238,7 @@ function updateClock(){
 
 const now=new Date()
 
-clock.innerText = now.toLocaleTimeString([], {
+clock.innerText = now.toLocaleTimeString([],{
 hour:'2-digit',
 minute:'2-digit',
 second:'2-digit'
@@ -245,6 +258,7 @@ const inEl=document.getElementById("in")
 const outEl=document.getElementById("out")
 
 const processList=document.getElementById("processList")
+const clock=document.getElementById("clock")
 
 setInterval(update,2000)
 setInterval(updateClock,1000)
