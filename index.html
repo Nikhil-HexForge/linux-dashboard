@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<title>Nikhil Sonawane | Linux Dashboard</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+margin:0;
+background:#0b1220;
+color:#e2e8f0;
+font-family:'Patrick Hand', cursive;
+}
+
+.container{
+max-width:1100px;
+margin:auto;
+padding:30px;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+flex-wrap:wrap;
+}
+
+header h1{
+margin:0;
+font-size:38px;
+}
+
+.clock{
+font-family:monospace;
+color:#22c55e;
+}
+
+/* about */
+
+.about{
+background:#1e293b;
+padding:20px;
+border-radius:12px;
+margin-bottom:30px;
+line-height:1.6;
+}
+
+/* grid */
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:20px;
+}
+
+/* cards */
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 20px rgba(0,255,120,.05);
+}
+
+.card h3{
+margin:0 0 10px 0;
+}
+
+/* stat */
+
+.stat{
+font-size:36px;
+}
+
+/* progress */
+
+.bar{
+height:8px;
+background:#334155;
+border-radius:8px;
+margin-top:10px;
+overflow:hidden;
+}
+
+.bar span{
+display:block;
+height:100%;
+background:#22c55e;
+width:0%;
+transition:width .5s ease;
+}
+
+/* processes */
+
+.process{
+display:flex;
+justify-content:space-between;
+font-size:14px;
+padding:3px 0;
+font-family:monospace;
+}
+
+/* network */
+
+.network{
+font-family:monospace;
+color:#22c55e;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+<h1>Nikhil Sonawane</h1>
+<div class="clock" id="clock"></div>
+</header>
+
+<div class="about">
+<h3>Linux Administrator</h3>
+<p>
+Maintaining secure and stable Linux environments,
+monitoring infrastructure, automating workflows,
+and keeping production systems reliable.
+</p>
+</div>
+
+<div class="grid">
+
+<div class="card">
+<h3>CPU Usage</h3>
+<div class="stat" id="cpu">0%</div>
+<div class="bar"><span id="cpuBar"></span></div>
+</div>
+
+<div class="card">
+<h3>Memory Usage</h3>
+<div class="stat" id="mem">0%</div>
+<div class="bar"><span id="memBar"></span></div>
+</div>
+
+<div class="card">
+<h3>Disk Usage</h3>
+<div class="stat" id="disk">0%</div>
+<div class="bar"><span id="diskBar"></span></div>
+</div>
+
+<div class="card">
+<h3>Servers</h3>
+<div class="stat">6 Online</div>
+</div>
+
+<div class="card">
+<h3>Running Processes</h3>
+<div id="processList"></div>
+</div>
+
+<div class="card network">
+<h3>Network</h3>
+In: <span id="in"></span> Kbps<br>
+Out: <span id="out"></span> Kbps
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const processes=["nginx","mysqld","docker","redis","node","postgres"]
+
+function r(n){
+return Math.floor(Math.random()*n)
+}
+
+function update(){
+
+let cpu=r(90)+5
+let mem=r(80)+10
+let disk=r(70)+20
+
+cpuEl.innerText=cpu+"%"
+memEl.innerText=mem+"%"
+diskEl.innerText=disk+"%"
+
+cpuBar.style.width=cpu+"%"
+memBar.style.width=mem+"%"
+diskBar.style.width=disk+"%"
+
+inEl.innerText=r(200)+50
+outEl.innerText=r(300)+60
+
+let html=""
+
+for(let i=0;i<5;i++){
+
+let name=processes[r(processes.length)]
+let cpu=r(5)+1
+let mem=r(500)+50
+
+html+=`
+<div class="process">
+<span>${name}</span>
+<span>${cpu}% | ${mem}MB</span>
+</div>
+`
+
+}
+
+processList.innerHTML=html
+
+}
+
+function updateClock(){
+
+const now=new Date()
+
+clock.innerText = now.toLocaleTimeString([], {
+hour:'2-digit',
+minute:'2-digit',
+second:'2-digit'
+})
+
+}
+
+const cpuEl=document.getElementById("cpu")
+const memEl=document.getElementById("mem")
+const diskEl=document.getElementById("disk")
+
+const cpuBar=document.getElementById("cpuBar")
+const memBar=document.getElementById("memBar")
+const diskBar=document.getElementById("diskBar")
+
+const inEl=document.getElementById("in")
+const outEl=document.getElementById("out")
+
+const processList=document.getElementById("processList")
+
+setInterval(update,2000)
+setInterval(updateClock,1000)
+
+update()
+updateClock()
+
+</script>
+
+</body>
+</html>
