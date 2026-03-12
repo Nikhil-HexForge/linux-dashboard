@@ -11,18 +11,9 @@
 
 body{
 margin:0;
-background:#000;
+background:rgb(30,30,30);
 color:#e5e7eb;
 font-family:'JetBrains Mono', monospace;
-}
-
-/* MATRIX BACKGROUND */
-
-#matrix{
-position:fixed;
-top:0;
-left:0;
-z-index:-1;
 }
 
 /* BOOT SCREEN */
@@ -33,7 +24,7 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:#000;
+background:#111;
 color:#22c55e;
 padding:30px;
 font-size:14px;
@@ -42,7 +33,7 @@ font-size:14px;
 /* MAIN */
 
 .container{
-max-width:1200px;
+max-width:1100px;
 margin:auto;
 padding:30px;
 display:none;
@@ -59,7 +50,7 @@ margin-bottom:25px;
 
 header h1{
 margin:0;
-font-size:34px;
+font-size:32px;
 }
 
 .cursor{
@@ -68,47 +59,30 @@ animation:blink 1s infinite;
 }
 
 @keyframes blink{
-0%,50%,100%{opacity:1}
-25%,75%{opacity:0}
+50%{opacity:0}
 }
 
-.clock{
-color:#22c55e;
-}
+.clock{color:#22c55e;}
+.uptime{font-size:13px;color:#9ca3af}
 
-.uptime{
-font-size:13px;
-color:#9ca3af;
-}
+/* CARDS */
 
-/* ABOUT */
-
-.about{
+.about,.card,.contact{
 background:#111827;
 padding:20px;
 border-radius:10px;
-margin-bottom:20px;
-line-height:1.6;
 }
 
-/* STATS */
+.about{margin-bottom:25px;}
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
 gap:20px;
-margin-bottom:20px;
+margin-bottom:25px;
 }
 
-.card{
-background:#111827;
-padding:18px;
-border-radius:10px;
-}
-
-.stat{
-font-size:28px;
-}
+.stat{font-size:26px;}
 
 .bar{
 height:6px;
@@ -123,7 +97,6 @@ display:block;
 height:100%;
 background:#22c55e;
 width:0%;
-transition:.5s;
 }
 
 /* HTOP */
@@ -133,20 +106,16 @@ background:#020617;
 padding:15px;
 border-radius:10px;
 font-size:13px;
-margin-top:20px;
+}
+
+.htop-header,.htop-row{
+display:grid;
+grid-template-columns:80px 1fr 120px 100px;
 }
 
 .htop-header{
-display:grid;
-grid-template-columns:80px 1fr 120px 100px;
 color:#22c55e;
 margin-bottom:8px;
-}
-
-.htop-row{
-display:grid;
-grid-template-columns:80px 1fr 120px 100px;
-padding:3px 0;
 }
 
 .cpu-bar{
@@ -176,12 +145,22 @@ color:#22c55e;
 font-size:13px;
 }
 
+/* CONTACT */
+
+.contact{
+margin-top:30px;
+}
+
+.contact a{
+color:#22c55e;
+text-decoration:none;
+}
+
 </style>
 </head>
 
 <body>
 
-<canvas id="matrix"></canvas>
 <div id="boot"></div>
 
 <div class="container" id="dashboard">
@@ -194,19 +173,26 @@ font-size:13px;
 <div class="clock" id="clock"></div>
 </header>
 
-<!-- ABOUT SECTION -->
-
 <div class="about">
-<h3>Linux Administrator</h3>
+<h3>Linux System Administrator</h3>
+
 <p>
-Responsible for managing and maintaining Linux servers ensuring
-system availability, monitoring infrastructure, troubleshooting
-production issues, managing services and maintaining secure
-and reliable environments.
+Linux System Administrator experienced in managing production
+Linux environments and ensuring high availability of critical
+services. Skilled in system monitoring, troubleshooting,
+performance tuning and maintaining secure infrastructure.
+</p>
+
+<p>
+Experienced with Linux services including SSH, Nginx,
+systemd, cron jobs, log analysis and server monitoring tools.
+</p>
+
+<p>
+Focused on maintaining reliable infrastructure and improving
+system performance in stable production environments.
 </p>
 </div>
-
-<!-- SYSTEM STATS -->
 
 <div class="grid">
 
@@ -235,8 +221,6 @@ Servers
 
 </div>
 
-<!-- HTOP TABLE -->
-
 <div class="htop">
 
 <div class="htop-header">
@@ -250,48 +234,27 @@ Servers
 
 </div>
 
-<!-- SYSTEM LOGS -->
-
 <div class="logs" id="logs"></div>
+
+<div class="contact">
+<h3>Contact</h3>
+
+<p>Email:
+<a href="mailto:itsnikhil.sonawane@gmail.com">
+itsnikhil.sonawane@gmail.com
+</a>
+</p>
+
+<p>
+Open to opportunities in Linux administration,
+system operations and infrastructure management.
+</p>
+
+</div>
 
 </div>
 
 <script>
-
-/* MATRIX */
-
-const canvas=document.getElementById("matrix")
-const ctx=canvas.getContext("2d")
-
-canvas.width=window.innerWidth
-canvas.height=window.innerHeight
-
-const letters="01"
-const fontSize=14
-const columns=canvas.width/fontSize
-const drops=[]
-
-for(let i=0;i<columns;i++) drops[i]=1
-
-function drawMatrix(){
-ctx.fillStyle="rgba(0,0,0,0.05)"
-ctx.fillRect(0,0,canvas.width,canvas.height)
-
-ctx.fillStyle="#22c55e"
-ctx.font=fontSize+"px monospace"
-
-for(let i=0;i<drops.length;i++){
-let text=letters[Math.floor(Math.random()*letters.length)]
-ctx.fillText(text,i*fontSize,drops[i]*fontSize)
-
-if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
-drops[i]=0
-
-drops[i]++
-}
-}
-
-setInterval(drawMatrix,40)
 
 /* BOOT SCREEN */
 
@@ -312,34 +275,25 @@ const boot=document.getElementById("boot")
 function bootAnim(){
 
 if(b<bootLines.length){
-
 let line=document.createElement("div")
 line.textContent=bootLines[b]
 boot.appendChild(line)
-
 b++
 setTimeout(bootAnim,400)
-
 }else{
-
 setTimeout(()=>{
 boot.style.display="none"
 dashboard.style.display="block"
-},1000)
-
+},800)
 }
 
 }
 
 bootAnim()
 
-/* UTIL */
-
 function r(n){return Math.floor(Math.random()*n)}
 
 const processes=["nginx","mysqld","docker","redis","node","postgres"]
-
-/* STATS */
 
 function updateStats(){
 
@@ -355,8 +309,6 @@ cpuBar.style.width=cpu+"%"
 memBar.style.width=mem+"%"
 diskBar.style.width=disk+"%"
 }
-
-/* HTOP */
 
 function updateHtop(){
 
@@ -383,13 +335,9 @@ ${cpu}%
 htopTable.innerHTML=html
 }
 
-/* CLOCK */
-
 function updateClock(){
 clock.innerText=new Date().toLocaleTimeString()
 }
-
-/* UPTIME */
 
 const start=Date.now()
 
@@ -403,8 +351,6 @@ let s=t%60
 
 uptime.innerText=`Uptime: ${h}h ${m}m ${s}s`
 }
-
-/* LOGS */
 
 const logsArr=[
 "ssh login detected",
